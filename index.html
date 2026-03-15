@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SODA SHAKE — Multiplayer Chaos</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:root {
+  --bg:#0a0a14; --panel:#12121f; --panel2:#1a1a2e; --border:#2a2a45;
+  --accent:#ff3c6e; --accent2:#00e5ff; --accent3:#ffe600;
+  --text:#f0eeff; --muted:#7070aa; --green:#00ff9d; --orange:#ff8c00;
+  --radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;}
+
+.screen{display:none;width:100vw;height:100vh;}
+.screen.active{display:flex;}
+
+/* ENTRY */
+#screen-entry{flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 60% 40%,#1a0030 0%,#0a0a14 70%);gap:0;overflow-y:auto;padding:20px 0;}
+.logo{font-family:'Boogaloo',cursive;font-size:clamp(2.8rem,8vw,6.5rem);letter-spacing:2px;
+  background:linear-gradient(135deg,#ff3c6e,#ffe600,#00e5ff);-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text;text-align:center;line-height:1;
+  filter:drop-shadow(0 0 30px #ff3c6e88);animation:logoPulse 3s ease-in-out infinite;}
+@keyframes logoPulse{0%,100%{filter:drop-shadow(0 0 30px #ff3c6e88);}50%{filter:drop-shadow(0 0 60px #00e5ff88);}}
+.logo-sub{font-size:.95rem;color:var(--muted);letter-spacing:6px;text-transform:uppercase;margin-top:4px;margin-bottom:32px;}
+
+.entry-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:26px 30px;width:min(460px,92vw);display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 60px #0009;}
+.section-label{font-size:.78rem;color:var(--muted);font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.inp{width:100%;padding:11px 14px;background:#0d0d20;border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-family:inherit;font-size:.95rem;outline:none;transition:border-color .2s;}
+.inp:focus{border-color:var(--accent2);}
+.inp-row{display:flex;gap:8px;align-items:center;}
+.inp-row .inp{flex:1;}
+.pw-toggle{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:4px;flex-shrink:0;}
+
+.btn{padding:11px 18px;border:none;border-radius:10px;font-family:'Boogaloo',cursive;
+  font-size:1.05rem;letter-spacing:1px;cursor:pointer;transition:transform .1s,filter .2s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{filter:brightness(1.15);}
+.btn-secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--accent2);color:var(--accent2);}
+.btn-sm{padding:7px 12px;font-size:.85rem;}
+.divider{height:1px;background:var(--border);}
+
+.flair-row{display:flex;gap:8px;flex-wrap:wrap;}
+.flair-opt{padding:6px 12px;border-radius:20px;border:2px solid transparent;
+  cursor:pointer;font-size:1rem;background:var(--panel2);transition:border-color .15s,transform .1s;user-select:none;}
+.flair-opt:hover{transform:scale(1.1);}
+.flair-opt.selected{border-color:var(--accent3);box-shadow:0 0 10px var(--accent3)66;}
+
+.lobby-list{display:flex;flex-direction:column;gap:7px;max-height:200px;overflow-y:auto;}
+.lobby-item{display:flex;align-items:center;justify-content:space-between;
+  background:var(--panel2);border:1px solid var(--border);border-radius:10px;
+  padding:10px 13px;cursor:pointer;transition:border-color .2s;}
+.lobby-item:hover{border-color:var(--accent2);}
+.lname{font-weight:800;font-size:.9rem;display:flex;align-items:center;gap:6px;}
+.lcnt{font-size:.78rem;color:var(--muted);}
+.ljoin{font-size:.78rem;color:var(--accent2);font-weight:700;}
+.llock{font-size:.85rem;}
+.no-lobbies{color:var(--muted);font-size:.85rem;text-align:center;padding:14px 0;}
+
+.conn-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--muted);}
+.conn-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green);}
+.conn-dot.bad{background:var(--accent);}
+.conn-label{font-size:.75rem;color:var(--muted);display:flex;align-items:center;}
+
+/* PASSWORD MODAL */
+#pw-modal{display:none;position:fixed;inset:0;background:#000c;z-index:200;align-items:center;justify-content:center;}
+#pw-modal.show{display:flex;}
+.pw-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:28px;width:min(340px,90vw);display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 60px #000a;}
+.pw-box h3{font-family:'Boogaloo',cursive;font-size:1.4rem;color:var(--accent2);}
+.pw-box p{font-size:.85rem;color:var(--muted);}
+.pw-err{font-size:.8rem;color:var(--accent);display:none;}
+.pw-err.show{display:block;}
+.pw-btns{display:flex;gap:10px;}
+
+/* GAME SCREEN */
+#screen-game{flex-direction:row;overflow:hidden;}
+#game-area{flex:3;display:flex;flex-direction:column;overflow:hidden;padding:14px;gap:10px;}
+.game-header{display:flex;align-items:center;gap:10px;font-family:'Boogaloo',cursive;font-size:1.2rem;flex-wrap:wrap;}
+.room-tag{background:var(--panel);border:1px solid var(--border);border-radius:8px;
+  padding:3px 10px;font-size:.8rem;color:var(--muted);}
+.players-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  gap:10px;overflow-y:auto;align-content:start;}
+
+/* PLAYER CARD */
+.player-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;
+  position:relative;transition:border-color .3s;}
+.player-card.is-me{border-color:#ffffff22;}
+.player-card.exploded{opacity:.5;border-color:var(--accent)!important;}
+.player-card.in-emergency{border-color:var(--orange)!important;}
+.emergency-overlay{position:absolute;inset:0;background:#ff8c0018;border-radius:var(--radius);
+  pointer-events:none;display:none;animation:emergPulse 1s ease-in-out infinite;}
+@keyframes emergPulse{0%,100%{opacity:0}50%{opacity:1}}
+.player-card.in-emergency .emergency-overlay{display:block;}
+
+.pname{font-weight:800;font-size:.88rem;display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:center;text-align:center;}
+.pflair{font-size:1.05rem;}
+.me-badge{font-size:.58rem;background:var(--accent);color:#fff;border-radius:4px;padding:1px 5px;font-weight:700;letter-spacing:1px;}
+.pill{display:inline-block;padding:2px 7px;border-radius:20px;font-size:.62rem;font-weight:800;letter-spacing:1px;}
+.pill-out{background:#ff3c6e22;color:var(--accent);border:1px solid var(--accent)66;}
+
+.cam-wrap{width:100%;border-radius:8px;overflow:hidden;background:#050510;aspect-ratio:4/3;position:relative;}
+.cam-video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1);}
+.cam-off-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.72rem;text-align:center;padding:8px;}
+.cam-toggle-btn{position:absolute;bottom:5px;right:5px;background:#000a;border:none;border-radius:6px;
+  color:#fff;font-size:.62rem;padding:3px 7px;cursor:pointer;font-family:inherit;z-index:2;}
+
+.stroke-wrap{position:relative;width:82px;height:82px;}
+.stroke-track{width:100%;height:100%;border-radius:50%;background:var(--panel2);border:3px solid var(--border);position:relative;overflow:hidden;}
+.stroke-fill{position:absolute;bottom:0;left:0;right:0;transition:height .08s ease,background .3s;border-radius:0 0 50px 50px;}
+.stroke-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Boogaloo',cursive;font-size:1.4rem;text-shadow:0 1px 4px #000;z-index:2;}
+
+.speed-ctrl{display:flex;align-items:center;gap:6px;}
+.speed-btn{width:26px;height:26px;border-radius:50%;border:none;background:var(--panel2);color:var(--text);
+  font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;font-family:inherit;}
+.speed-btn:hover{background:var(--border);}
+.speed-btn:disabled{opacity:.3;cursor:default;}
+.speed-display{font-weight:800;font-size:.85rem;min-width:18px;text-align:center;}
+
+.closeness-wrap{width:100%;display:flex;flex-direction:column;gap:4px;}
+.closeness-label{font-size:.62rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.closeness-bar-bg{width:100%;height:13px;border-radius:20px;background:var(--panel2);border:1px solid var(--border);overflow:hidden;position:relative;}
+.closeness-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#00ff9d,#ffe600,#ff3c6e);transition:width .3s;}
+.closeness-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:800;color:#fff;text-shadow:0 0 4px #000;}
+.closeness-controls{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.closeness-slider{flex:1;min-width:50px;accent-color:var(--accent);height:4px;cursor:pointer;}
+.btn-emergency{padding:4px 7px;border-radius:7px;border:2px solid var(--orange);background:transparent;
+  color:var(--orange);font-family:'Boogaloo',cursive;font-size:.75rem;cursor:pointer;
+  transition:background .15s,color .15s;white-space:nowrap;}
+.btn-emergency:hover,.btn-emergency.active{background:var(--orange);color:#000;}
+.btn-emergency.active{animation:emergFlash .5s infinite;}
+@keyframes emergFlash{0%,100%{opacity:1}50%{opacity:.6}}
+.btn-explode{padding:4px 7px;border-radius:7px;border:2px solid var(--accent);background:transparent;
+  color:var(--accent);font-family:'Boogaloo',cursive;font-size:.75rem;cursor:pointer;}
+.btn-explode:hover{background:var(--accent);color:#fff;}
+.emergency-timer{font-size:.65rem;color:var(--orange);font-weight:800;text-align:center;display:none;}
+.other-note{font-size:.65rem;color:var(--muted);text-align:center;}
+
+/* SIDEBAR */
+#sidebar{flex:1;min-width:230px;max-width:300px;display:flex;flex-direction:column;
+  background:var(--panel);border-left:1px solid var(--border);overflow:hidden;}
+.sidebar-section{padding:11px;border-bottom:1px solid var(--border);}
+.sidebar-title{font-family:'Boogaloo',cursive;font-size:.95rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.lb-list{display:flex;flex-direction:column;gap:4px;}
+.lb-item{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:8px;background:var(--panel2);font-size:.82rem;}
+.lb-rank{font-family:'Boogaloo',cursive;font-size:.95rem;color:var(--accent3);min-width:18px;}
+.lb-flair{font-size:.95rem;}
+.lb-name{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lb-pct{font-size:.7rem;color:var(--muted);}
+.lb-status{font-size:.65rem;color:var(--accent);}
+
+.my-flair-row{display:flex;gap:6px;flex-wrap:wrap;}
+.my-flair-opt{font-size:1.05rem;cursor:pointer;padding:4px;border-radius:6px;
+  border:2px solid transparent;transition:border-color .15s,transform .1s;}
+.my-flair-opt:hover{transform:scale(1.2);}
+.my-flair-opt.selected{border-color:var(--accent3);background:var(--panel);}
+
+#chat-section{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#chat-section .sidebar-title{padding:11px 11px 0;}
+#chat-messages{flex:1;overflow-y:auto;padding:7px 11px;display:flex;flex-direction:column;gap:5px;}
+#chat-messages::-webkit-scrollbar{width:3px;}
+#chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.chat-msg{display:flex;flex-direction:column;gap:2px;}
+.cm-head{display:flex;align-items:center;gap:5px;}
+.cm-author{font-size:.72rem;font-weight:800;}
+.cm-flair{font-size:.82rem;}
+.cm-text{font-size:.78rem;line-height:1.4;color:#ccc;word-break:break-word;}
+.cm-img{max-width:100%;border-radius:7px;margin-top:3px;cursor:pointer;}
+.chat-msg.system .cm-text{color:var(--accent3);font-style:italic;font-size:.74rem;}
+.chat-input-area{padding:9px 11px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:5px;}
+.chat-input-row{display:flex;gap:5px;}
+.chat-inp{flex:1;padding:7px 9px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:inherit;font-size:.78rem;outline:none;transition:border-color .2s;}
+.chat-inp:focus{border-color:var(--accent2);}
+.btn-send{padding:7px 11px;border-radius:8px;border:none;background:var(--accent2);color:#000;
+  font-family:'Boogaloo',cursive;font-size:.88rem;cursor:pointer;}
+.btn-send:hover{filter:brightness(1.1);}
+.btn-img-upload{padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);
+  color:var(--text);cursor:pointer;font-size:.88rem;}
+.btn-img-upload:hover{border-color:var(--accent2);}
+#img-input{display:none;}
+
+/* EXPLOSION MODAL */
+#explosion-modal{display:none;position:fixed;inset:0;background:#000c;z-index:100;align-items:center;justify-content:center;}
+#explosion-modal.show{display:flex;}
+.modal-box{background:var(--panel);border:2px solid var(--accent);border-radius:var(--radius);
+  padding:28px;text-align:center;max-width:320px;width:90%;box-shadow:0 0 60px var(--accent)55;
+  animation:modalBounce .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes modalBounce{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-box h2{font-family:'Boogaloo',cursive;font-size:1.9rem;color:var(--accent);margin-bottom:6px;}
+.modal-box p{color:var(--muted);margin-bottom:18px;font-size:.88rem;}
+.modal-btns{display:flex;gap:10px;justify-content:center;}
+
+@keyframes explodeAnim{0%{transform:scale(1);filter:brightness(1);}30%{transform:scale(1.25);filter:brightness(3);}100%{transform:scale(1);filter:brightness(.6);}}
+.player-card.boom{animation:explodeAnim .5s ease-out forwards;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ENTRY SCREEN -->
+<div id="screen-entry" class="screen active">
+  <div class="logo">🥤 SODA SHAKE</div>
+  <div class="logo-sub">Multiplayer Chaos</div>
+
+  <div class="entry-card">
+    <!-- Connection status -->
+    <div class="conn-label"><span class="conn-dot" id="conn-dot"></span><span id="conn-text">Connecting…</span></div>
+
+    <div class="section-label">Your Identity</div>
+    <input id="inp-username" class="inp" placeholder="Username…" maxlength="18">
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">Pick a flair</div>
+      <div class="flair-row" id="entry-flair-row"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Create lobby -->
+    <div class="section-label">Create lobby</div>
+    <input id="inp-room-name" class="inp" placeholder="Room name (optional)…" maxlength="28">
+    <div>
+      <div class="section-label" style="margin-bottom:6px;">Password (optional)</div>
+      <div class="inp-row">
+        <input id="inp-pw-create" class="inp" type="password" placeholder="Leave blank = public…" maxlength="64" autocomplete="new-password">
+        <button class="pw-toggle" onclick="togglePwVis('inp-pw-create',this)" title="Show/hide">👁</button>
+      </div>
+      <div style="font-size:.7rem;color:var(--muted);margin-top:4px;">
+        🔒 Password is hashed client-side before sending — never sent as plaintext.
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="createLobby()">🎲 Create &amp; Join</button>
+
+    <div class="divider"></div>
+
+    <!-- Join lobby -->
+    <div class="section-label">Or join a lobby</div>
+    <div class="lobby-list" id="lobby-list">
+      <div class="no-lobbies">No lobbies yet — create one above!</div>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL (for joining locked rooms) -->
+<div id="pw-modal">
+  <div class="pw-box">
+    <h3>🔒 Password Required</h3>
+    <p>This lobby is password-protected. Enter the password to join.</p>
+    <div class="inp-row">
+      <input id="pw-modal-inp" class="inp" type="password" placeholder="Enter password…" maxlength="64" autocomplete="current-password">
+      <button class="pw-toggle" onclick="togglePwVis('pw-modal-inp',this)" title="Show/hide">👁</button>
+    </div>
+    <div class="pw-err" id="pw-err">❌ Wrong password — try again.</div>
+    <div class="pw-btns">
+      <button class="btn btn-secondary" style="flex:1" onclick="closePwModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1" onclick="submitPwModal()">Join →</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screen-game" class="screen">
+  <div id="game-area">
+    <div class="game-header">
+      <span>🥤 SODA SHAKE</span>
+      <span class="room-tag" id="room-label">Room: —</span>
+      <span class="room-tag" id="player-count-label">0/6</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-secondary btn-sm" onclick="leaveGame()">Leave</button>
+    </div>
+    <div class="players-grid" id="players-grid"></div>
+  </div>
+
+  <div id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">🏆 Leaderboard</div>
+      <div class="lb-list" id="lb-list"></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">✨ My Flair</div>
+      <div class="my-flair-row" id="sidebar-flair-row"></div>
+    </div>
+    <div id="chat-section">
+      <div class="sidebar-title" style="padding:11px 11px 0">💬 Chat</div>
+      <div id="chat-messages"></div>
+      <div class="chat-input-area">
+        <div class="chat-input-row">
+          <input id="chat-inp" class="chat-inp" placeholder="Say something…" maxlength="200">
+          <label class="btn-img-upload" title="Send image">📷
+            <input type="file" id="img-input" accept="image/*" onchange="sendImage(this)">
+          </label>
+          <button class="btn-send" onclick="sendChat()">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPLOSION MODAL -->
+<div id="explosion-modal">
+  <div class="modal-box">
+    <div style="font-size:2.8rem">💥</div>
+    <h2>BOTTLE EXPLODED!</h2>
+    <p>Your soda bottle blew up! What do you want to do?</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="stayInGame()">😅 Stay In</button>
+      <button class="btn btn-primary" onclick="exitGame()">👋 I'm Out</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  CONSTANTS
+// ════════════════════════════════════════════════
+const FLAIRS = ['🔥','💀','👑','🌊','⚡','🌈'];
+const PLAYER_COLORS = ['#ff3c6e','#00e5ff','#ffe600','#00ff9d','#ff8c00','#c77dff'];
+
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+let me = { id: crypto.randomUUID(), username:'', flair:'🔥', color: PLAYER_COLORS[Math.floor(Math.random()*6)] };
+let currentRoom = null;
+let players = {};
+let strokePhases = {};
+let myCloseness = 10;
+let myExploded = false;
+let myOut = false;
+let myEmergency = false;
+let emergencyInterval = null;
+let gameLoopId = null;
+let camStreams = {};
+let pendingJoinRoomId = null; // for password modal
+
+// ════════════════════════════════════════════════
+//  WEBSOCKET
+// ════════════════════════════════════════════════
+let ws = null;
+let wsReady = false;
+
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}`);
+
+  ws.onopen = () => {
+    wsReady = true;
+    setConnStatus('ok', '🟢 Connected');
+  };
+  ws.onclose = () => {
+    wsReady = false;
+    setConnStatus('bad', '🔴 Disconnected — reload to reconnect');
+    setTimeout(connectWS, 3000);
+  };
+  ws.onerror = () => {
+    setConnStatus('bad', '🔴 Connection error');
+  };
+  ws.onmessage = (e) => {
+    let msg; try { msg = JSON.parse(e.data); } catch { return; }
+    handleServerMsg(msg);
+  };
+}
+
+function wsSend(obj) {
+  if (wsReady) ws.send(JSON.stringify(obj));
+}
+
+function setConnStatus(cls, txt) {
+  const dot = document.getElementById('conn-dot');
+  const label = document.getElementById('conn-text');
+  if (dot) { dot.className = 'conn-dot ' + cls; }
+  if (label) label.textContent = txt;
+}
+
+function handleServerMsg(msg) {
+  switch(msg.type) {
+    case 'LOBBY_LIST':
+      renderLobbyList(msg.lobbies);
+      break;
+
+    case 'JOINED':
+      currentRoom = { id: msg.roomId, name: msg.roomName };
+      enterGameScreen();
+      break;
+
+    case 'PLAYER_JOIN':
+      if (!players[msg.player.id]) {
+        players[msg.player.id] = { ...msg.player, speed: msg.player.speed||5 };
+        strokePhases[msg.player.id] = 0;
+        addChatMsg({ system:true, text:`${msg.player.username} joined!` });
+        renderAll();
+      }
+      // Send them my state
+      wsSend({ type:'PLAYER_STATE', player: getMyPlayerData() });
+      break;
+
+    case 'STATE_REQUEST':
+      wsSend({ type:'STATE_RESPONSE', targetId: msg.requesterId, players: Object.values(players) });
+      break;
+
+    case 'STATE_RESPONSE':
+      msg.players.forEach(p => {
+        if (p.id !== me.id && !players[p.id]) {
+          players[p.id] = { ...p, speed: p.speed||5 };
+          strokePhases[p.id] = 0;
+        }
+      });
+      renderAll();
+      break;
+
+    case 'PLAYER_STATE':
+      if (msg.player.id !== me.id) {
+        const existed = !!players[msg.player.id];
+        players[msg.player.id] = { ...msg.player, speed: msg.player.speed||5 };
+        if (!strokePhases[msg.player.id]) strokePhases[msg.player.id] = 0;
+        if (!existed) addChatMsg({ system:true, text:`${msg.player.username} is here!` });
+        renderAll();
+      }
+      break;
+
+    case 'SPEED_CHANGE':
+      if (msg.targetId !== me.id && players[msg.targetId]) {
+        players[msg.targetId].speed = msg.speed;
+        renderAll();
+      }
+      break;
+
+    case 'FLAIR_UPDATE':
+      if (players[msg.id]) { players[msg.id].flair = msg.flair; renderAll(); }
+      break;
+
+    case 'CHAT':
+      addChatMsg(msg);
+      break;
+
+    case 'PLAYER_LEAVE':
+      if (players[msg.playerId]) {
+        addChatMsg({ system:true, text:`${players[msg.playerId].username} left.` });
+        delete players[msg.playerId];
+        delete strokePhases[msg.playerId];
+        renderAll();
+      }
+      break;
+
+    case 'NEED_PASSWORD':
+      openPwModal(msg.roomId);
+      break;
+
+    case 'WRONG_PASSWORD':
+      document.getElementById('pw-err').classList.add('show');
+      break;
+
+    case 'ERROR':
+      alert(msg.text);
+      break;
+  }
+}
+
+// ════════════════════════════════════════════════
+//  CRYPTO — client-side pre-hash
+// ════════════════════════════════════════════════
+// We hash: SHA-256( roomId + "::soda::" + password )
+// This means plaintext never touches the wire.
+async function clientHash(roomId, password) {
+  if (!password) return null;
+  const data = new TextEncoder().encode(roomId + '::soda::' + password);
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ════════════════════════════════════════════════
+//  ENTRY SCREEN
+// ════════════════════════════════════════════════
+function buildEntryFlair() {
+  const row = document.getElementById('entry-flair-row');
+  row.innerHTML = '';
+  FLAIRS.forEach((f,i) => {
+    const el = document.createElement('span');
+    el.className = 'flair-opt' + (i===0?' selected':'');
+    el.textContent = f;
+    el.onclick = () => {
+      document.querySelectorAll('#entry-flair-row .flair-opt').forEach(e=>e.classList.remove('selected'));
+      el.classList.add('selected');
+      me.flair = f;
+    };
+    row.appendChild(el);
+  });
+}
+buildEntryFlair();
+
+function buildSidebarFlair() {
+  const row = document.getElementById('sidebar-flair-row');
+  row.innerHTML = '';
+  FLAIRS.forEach(f => {
+    const el = document.createElement('span');
+    el.className = 'my-flair-opt' + (f===me.flair?' selected':'');
+    el.textContent = f;
+    el.onclick = () => {
+      me.flair = f;
+      document.querySelectorAll('.my-flair-opt').forEach(e=>e.classList.remove('selected'));
+      el.classList.add('selected');
+      if (players[me.id]) players[me.id].flair = f;
+      wsSend({ type:'FLAIR_UPDATE', id:me.id, flair:f });
+      renderAll();
+    };
+    row.appendChild(el);
+  });
+}
+
+function togglePwVis(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
+function validateUsername() {
+  const u = document.getElementById('inp-username').value.trim();
+  if (!u) { alert('Please enter a username first!'); return null; }
+  me.username = u;
+  return u;
+}
+
+async function createLobby() {
+  if (!validateUsername()) return;
+  const roomName = document.getElementById('inp-room-name').value.trim()
+    || (me.username + "'s Room");
+  const roomId = 'r' + crypto.randomUUID().replace(/-/g,'').slice(0,10);
+  const rawPw = document.getElementById('inp-pw-create').value;
+  const hash = await clientHash(roomId, rawPw);
+
+  wsSend({ type:'CREATE_LOBBY', roomId, roomName, player: getMyPlayerData(), clientHash: hash });
+}
+
+async function joinLobby(lobby) {
+  if (!validateUsername()) return;
+  if (lobby.hasPassword) {
+    openPwModal(lobby.id);
+  } else {
+    wsSend({ type:'JOIN_LOBBY', roomId: lobby.id, player: getMyPlayerData(), clientHash: null });
+  }
+}
+
+// ════════════════════════════════════════════════
+//  PASSWORD MODAL
+// ════════════════════════════════════════════════
+function openPwModal(roomId) {
+  pendingJoinRoomId = roomId;
+  document.getElementById('pw-modal-inp').value = '';
+  document.getElementById('pw-err').classList.remove('show');
+  document.getElementById('pw-modal').classList.add('show');
+  setTimeout(() => document.getElementById('pw-modal-inp').focus(), 50);
+}
+
+function closePwModal() {
+  pendingJoinRoomId = null;
+  document.getElementById('pw-modal').classList.remove('show');
+}
+
+async function submitPwModal() {
+  if (!pendingJoinRoomId) return;
+  const rawPw = document.getElementById('pw-modal-inp').value;
+  if (!rawPw) { document.getElementById('pw-err').textContent = '❌ Please enter a password.'; document.getElementById('pw-err').classList.add('show'); return; }
+  document.getElementById('pw-err').classList.remove('show');
+  const hash = await clientHash(pendingJoinRoomId, rawPw);
+  wsSend({ type:'JOIN_LOBBY', roomId: pendingJoinRoomId, player: getMyPlayerData(), clientHash: hash });
+}
+
+document.getElementById('pw-modal-inp').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitPwModal();
+  if (e.key === 'Escape') closePwModal();
+});
+
+// ════════════════════════════════════════════════
+//  GAME SETUP
+// ════════════════════════════════════════════════
+function getMyPlayerData() {
+  return {
+    id: me.id, username: me.username, flair: me.flair, color: me.color,
+    speed: players[me.id]?.speed || 5,
+    closeness: myCloseness, exploded: myExploded, out: myOut, emergency: myEmergency
+  };
+}
+
+function enterGameScreen() {
+  // init my player entry
+  if (!players[me.id]) {
+    players[me.id] = { ...getMyPlayerData(), speed: 5 };
+    strokePhases[me.id] = 0;
+  }
+  myCloseness = 10; myExploded = false; myOut = false; myEmergency = false;
+
+  document.getElementById('screen-entry').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  document.getElementById('room-label').textContent = 'Room: ' + currentRoom.name;
+  closePwModal();
+  buildSidebarFlair();
+  renderAll();
+  startGameLoop();
+  // Broadcast my state so others learn about me
+  wsSend({ type:'PLAYER_STATE', player: getMyPlayerData() });
+  addChatMsg({ system:true, text:`You joined ${currentRoom.name}! 🥤` });
+}
+
+// ════════════════════════════════════════════════
+//  GAME LOOP
+// ════════════════════════════════════════════════
+let lastTick = 0;
+function startGameLoop() {
+  if (gameLoopId) cancelAnimationFrame(gameLoopId);
+  lastTick = performance.now();
+  function loop(now) {
+    const dt = (now - lastTick) / 1000;
+    lastTick = now;
+    Object.keys(strokePhases).forEach(id => {
+      const p = players[id];
+      if (!p || p.out || p.emergency) return;
+      const spd = p.speed || 5;
+      const cycleDur = 4 - ((spd - 1) / 14) * 3.7;
+      strokePhases[id] = (strokePhases[id] + dt / cycleDur) % 1;
+    });
+    updateStrokeCircles();
+    gameLoopId = requestAnimationFrame(loop);
+  }
+  gameLoopId = requestAnimationFrame(loop);
+}
+
+function updateStrokeCircles() {
+  Object.keys(strokePhases).forEach(id => {
+    const phase = strokePhases[id];
+    const val = (Math.sin(phase * Math.PI * 2 - Math.PI / 2) + 1) / 2;
+    const fill = document.getElementById(`stroke-fill-${id}`);
+    const label = document.getElementById(`stroke-label-${id}`);
+    if (fill) {
+      fill.style.height = (val * 100) + '%';
+      const spd = players[id]?.speed || 5;
+      const hue = 180 - spd * 8;
+      fill.style.background = `hsl(${hue},88%,55%)`;
+    }
+    if (label && players[id]) label.textContent = players[id].speed || 5;
+  });
+}
+
+// ════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════
+function renderAll() {
+  renderPlayers();
+  renderLeaderboard();
+  document.getElementById('player-count-label').textContent =
+    Object.keys(players).length + '/6';
+}
+
+function renderPlayers() {
+  const grid = document.getElementById('players-grid');
+  const currentIds = new Set(Object.keys(players));
+  grid.querySelectorAll('.player-card').forEach(card => {
+    if (!currentIds.has(card.dataset.pid)) card.remove();
+  });
+  Object.values(players).forEach(p => {
+    let card = document.getElementById(`card-${p.id}`);
+    if (!card) { card = buildPlayerCard(p); grid.appendChild(card); }
+    else updatePlayerCard(card, p);
+  });
+}
+
+function buildPlayerCard(p) {
+  const isMe = p.id === me.id;
+  const card = document.createElement('div');
+  card.className = 'player-card' + (isMe?' is-me':'') + (p.exploded?' exploded':'') + (p.emergency?' in-emergency':'');
+  card.id = `card-${p.id}`;
+  card.dataset.pid = p.id;
+
+  card.innerHTML = `
+    <div class="emergency-overlay"></div>
+    <div class="pname">
+      <span class="pflair">${p.flair}</span>
+      <span>${esc(p.username)}</span>
+      ${isMe ? '<span class="me-badge">YOU</span>' : ''}
+      ${p.out ? '<span class="pill pill-out">OUT</span>' : ''}
+    </div>
+
+    <div class="cam-wrap" id="cam-wrap-${p.id}">
+      <div class="cam-off-msg">📷 No cam</div>
+      ${isMe ? `<button class="cam-toggle-btn" onclick="toggleCam()">📷 Enable</button>` : ''}
+    </div>
+
+    <div class="stroke-wrap">
+      <div class="stroke-track" style="border-color:${p.color}55;box-shadow:0 0 16px ${p.color}33;">
+        <div class="stroke-fill" id="stroke-fill-${p.id}" style="height:50%;"></div>
+      </div>
+      <div class="stroke-label" id="stroke-label-${p.id}">${p.speed||5}</div>
+    </div>
+
+    ${!isMe ? `
+    <div class="speed-ctrl">
+      <button class="speed-btn" id="spd-dn-${p.id}" onclick="changeSpeed('${p.id}',-1)" ${(p.speed||5)<=1?'disabled':''}>−</button>
+      <span class="speed-display" id="spd-disp-${p.id}">${p.speed||5}</span>
+      <button class="speed-btn" id="spd-up-${p.id}" onclick="changeSpeed('${p.id}',+1)" ${(p.speed||5)>=15?'disabled':''}>+</button>
+    </div>
+    ` : `<div class="other-note">Others control your speed</div>`}
+
+    ${isMe ? `
+    <div class="closeness-wrap">
+      <div class="closeness-label">Closeness to explosion</div>
+      <div class="closeness-bar-bg">
+        <div class="closeness-bar-fill" id="close-fill-${p.id}" style="width:${myCloseness}%"></div>
+        <div class="closeness-pct" id="close-pct-${p.id}">${myCloseness}%</div>
+      </div>
+      <div class="closeness-controls">
+        <input type="range" class="closeness-slider" min="10" max="100" step="5"
+          value="${myCloseness}" id="close-slider-${p.id}" oninput="setCloseness(this.value)">
+        <button class="btn-emergency" id="emerg-btn-${p.id}" onclick="triggerEmergency()">🚨 Emergency</button>
+        <button class="btn-explode" onclick="triggerExplosion()">💥</button>
+      </div>
+      <div class="emergency-timer" id="emerg-timer-${p.id}"></div>
+    </div>
+    ` : `
+    <div class="closeness-wrap">
+      <div class="closeness-label">Closeness</div>
+      <div class="closeness-bar-bg">
+        <div class="closeness-bar-fill" id="close-fill-${p.id}" style="width:${p.closeness||10}%"></div>
+        <div class="closeness-pct" id="close-pct-${p.id}">${p.closeness||10}%</div>
+      </div>
+    </div>
+    `}
+  `;
+  return card;
+}
+
+function updatePlayerCard(card, p) {
+  const isMe = p.id === me.id;
+  card.className = 'player-card'+(isMe?' is-me':'')+(p.exploded?' exploded':'')+(p.emergency?' in-emergency':'');
+  // flair
+  const fl = card.querySelector('.pflair');
+  if (fl) fl.textContent = p.flair;
+  // speed controls
+  if (!isMe) {
+    const disp = document.getElementById(`spd-disp-${p.id}`);
+    const up = document.getElementById(`spd-up-${p.id}`);
+    const dn = document.getElementById(`spd-dn-${p.id}`);
+    if (disp) disp.textContent = p.speed||5;
+    if (up) up.disabled = (p.speed||5) >= 15;
+    if (dn) dn.disabled = (p.speed||5) <= 1;
+  }
+  // closeness bar
+  const fill = document.getElementById(`close-fill-${p.id}`);
+  const pct = document.getElementById(`close-pct-${p.id}`);
+  const val = isMe ? myCloseness : (p.closeness||10);
+  if (fill) fill.style.width = val + '%';
+  if (pct) pct.textContent = val + '%';
+}
+
+function renderLeaderboard() {
+  const list = document.getElementById('lb-list');
+  const sorted = Object.values(players).sort((a,b) => {
+    if (a.out && !b.out) return 1;
+    if (!a.out && b.out) return -1;
+    return (b.closeness||0) - (a.closeness||0);
+  });
+  list.innerHTML = '';
+  sorted.forEach((p,i) => {
+    const item = document.createElement('div');
+    item.className = 'lb-item';
+    item.innerHTML = `
+      <span class="lb-rank">#${i+1}</span>
+      <span class="lb-flair">${p.flair}</span>
+      <span class="lb-name" style="color:${p.color}">${esc(p.username)}</span>
+      <span class="lb-pct">${p.closeness||10}%</span>
+      ${p.out ? '<span class="lb-status">OUT</span>' : ''}
+      ${p.emergency ? '<span style="font-size:.65rem;color:var(--orange)">🚨</span>' : ''}
+    `;
+    list.appendChild(item);
+  });
+}
+
+function renderLobbyList(lobbies) {
+  const el = document.getElementById('lobby-list');
+  if (!lobbies || !lobbies.length) {
+    el.innerHTML = '<div class="no-lobbies">No lobbies yet — create one above!</div>';
+    return;
+  }
+  el.innerHTML = '';
+  lobbies.forEach(l => {
+    const full = l.count >= 6;
+    const item = document.createElement('div');
+    item.className = 'lobby-item';
+    item.innerHTML = `
+      <div>
+        <div class="lname">
+          ${l.hasPassword ? '<span class="llock">🔒</span>' : '🥤'}
+          ${esc(l.name)}
+        </div>
+        <div class="lcnt">Host: ${esc(l.hostName)} · ${l.count}/6</div>
+      </div>
+      <span class="ljoin">${full ? 'FULL' : 'JOIN →'}</span>
+    `;
+    if (!full) item.onclick = () => joinLobby(l);
+    el.appendChild(item);
+  });
+}
+
+// ════════════════════════════════════════════════
+//  SPEED CONTROL
+// ════════════════════════════════════════════════
+function changeSpeed(targetId, delta) {
+  const p = players[targetId];
+  if (!p) return;
+  const newSpeed = Math.max(1, Math.min(15, (p.speed||5) + delta));
+  players[targetId].speed = newSpeed;
+  renderAll();
+  wsSend({ type:'SPEED_CHANGE', targetId, speed: newSpeed });
+}
+
+// ════════════════════════════════════════════════
+//  CLOSENESS
+// ════════════════════════════════════════════════
+function setCloseness(val) {
+  myCloseness = parseInt(val);
+  players[me.id].closeness = myCloseness;
+  const fill = document.getElementById(`close-fill-${me.id}`);
+  const pct = document.getElementById(`close-pct-${me.id}`);
+  if (fill) fill.style.width = myCloseness + '%';
+  if (pct) pct.textContent = myCloseness + '%';
+  renderLeaderboard();
+  wsSend({ type:'PLAYER_STATE', player: getMyPlayerData() });
+}
+
+// ════════════════════════════════════════════════
+//  EMERGENCY
+// ════════════════════════════════════════════════
+function triggerEmergency() {
+  if (myEmergency) return;
+  myEmergency = true;
+  players[me.id].emergency = true;
+  players[me.id].speed = 1;
+  const card = document.getElementById(`card-${me.id}`);
+  if (card) card.classList.add('in-emergency');
+  const btn = document.getElementById(`emerg-btn-${me.id}`);
+  if (btn) btn.classList.add('active');
+  const timerEl = document.getElementById(`emerg-timer-${me.id}`);
+  wsSend({ type:'PLAYER_STATE', player: getMyPlayerData() });
+
+  let remaining = 30;
+  if (timerEl) { timerEl.style.display='block'; timerEl.textContent=`⏱ STOP SHAKING: ${remaining}s`; }
+
+  emergencyInterval = setInterval(() => {
+    remaining--;
+    if (timerEl) timerEl.textContent = `⏱ STOP SHAKING: ${remaining}s`;
+    if (remaining <= 0) {
+      clearInterval(emergencyInterval);
+      myEmergency = false;
+      players[me.id].emergency = false;
+      players[me.id].speed = 5;
+      if (card) card.classList.remove('in-emergency');
+      if (btn) btn.classList.remove('active');
+      if (timerEl) timerEl.style.display='none';
+      wsSend({ type:'PLAYER_STATE', player: getMyPlayerData() });
+      addChatMsg({ system:true, text:'Emergency over! Back to shaking. 🥤' });
+    }
+  }, 1000);
+}
+
+// ════════════════════════════════════════════════
+//  EXPLOSION
+// ════════════════════════════════════════════════
+function triggerExplosion() {
+  myExploded = true;
+  players[me.id].exploded = true;
+  wsSend({ type:'PLAYER_STATE', player: getMyPlayerData() });
+  const card = document.getElementById(`card-${me.id}`);
+  if (card) { card.classList.add('boom'); setTimeout(()=>card.classList.remove('boom'),600); }
+  document.getElementById('explosion-modal').classList.add('show');
+  const sysMsg = { system:true, text:`💥 ${me.username}'s bottle EXPLODED!` };
+  addChatMsg(sysMsg);
+  wsSend({ type:'CHAT', ...sysMsg });
+}
+
+function stayInGame() {
+  document.getElementById('explosion-modal').classList.remove('show');
+  myExploded = false; myOut = false;
+  myCloseness = 10;
+  players[me.id].exploded = false; players[me.id].out = false; players[me.id].closeness = 10;
+  const slider = document.getElementById(`close-slider-${me.id}`);
+  if (slider) slider.value = 10;
+  wsSend({ type:'PLAYER_STATE', player: getMyPlayerData() });
+  renderAll();
+}
+
+function exitGame() {
+  document.getElementById('explosion-modal').classList.remove('show');
+  myOut = true;
+  players[me.id].out = true; players[me.id].exploded = false;
+  wsSend({ type:'PLAYER_STATE', player: getMyPlayerData() });
+  renderAll();
+}
+
+// ════════════════════════════════════════════════
+//  CHAT
+// ════════════════════════════════════════════════
+function sendChat() {
+  const inp = document.getElementById('chat-inp');
+  const text = inp.value.trim();
+  if (!text) return;
+  const msg = { type:'CHAT', author:me.username, flair:me.flair, color:me.color, text };
+  wsSend(msg);
+  addChatMsg(msg); // show locally immediately
+  inp.value = '';
+}
+document.getElementById('chat-inp').addEventListener('keydown', e => { if(e.key==='Enter') sendChat(); });
+
+function sendImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const msg = { type:'CHAT', author:me.username, flair:me.flair, color:me.color, imgData:ev.target.result };
+    wsSend(msg);
+    addChatMsg(msg);
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function addChatMsg(msg) {
+  const el = document.createElement('div');
+  el.className = 'chat-msg' + (msg.system?' system':'');
+  if (msg.system) {
+    el.innerHTML = `<div class="cm-text">— ${esc(msg.text)} —</div>`;
+  } else {
+    let content = '';
+    if (msg.text) content += `<div class="cm-text">${esc(msg.text)}</div>`;
+    if (msg.imgData) content += `<img class="cm-img" src="${msg.imgData}" onclick="window.open(this.src)">`;
+    el.innerHTML = `<div class="cm-head"><span class="cm-flair">${msg.flair||''}</span>
+      <span class="cm-author" style="color:${msg.color||'#fff'}">${esc(msg.author||'')}</span></div>${content}`;
+  }
+  const container = document.getElementById('chat-messages');
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+}
+
+// ════════════════════════════════════════════════
+//  WEBCAM
+// ════════════════════════════════════════════════
+async function toggleCam() {
+  const wrap = document.getElementById(`cam-wrap-${me.id}`);
+  if (!wrap) return;
+  if (camStreams[me.id]) {
+    camStreams[me.id].getTracks().forEach(t=>t.stop());
+    delete camStreams[me.id];
+    wrap.innerHTML = `<div class="cam-off-msg">📷 No cam</div>
+      <button class="cam-toggle-btn" onclick="toggleCam()">📷 Enable</button>`;
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    camStreams[me.id] = stream;
+    const vid = document.createElement('video');
+    vid.className='cam-video'; vid.autoplay=true; vid.muted=true; vid.srcObject=stream;
+    const btn = document.createElement('button');
+    btn.className='cam-toggle-btn'; btn.textContent='❌ Disable'; btn.onclick=toggleCam;
+    wrap.innerHTML='';
+    wrap.appendChild(vid); wrap.appendChild(btn);
+  } catch {
+    alert('Camera access denied or unavailable.');
+  }
+}
+
+// ════════════════════════════════════════════════
+//  LEAVE
+// ════════════════════════════════════════════════
+function leaveGame() {
+  wsSend({ type:'LEAVE' });
+  if (gameLoopId) cancelAnimationFrame(gameLoopId);
+  if (camStreams[me.id]) { camStreams[me.id].getTracks().forEach(t=>t.stop()); delete camStreams[me.id]; }
+  if (emergencyInterval) clearInterval(emergencyInterval);
+  players={}; strokePhases={}; currentRoom=null;
+  myCloseness=10; myExploded=false; myOut=false; myEmergency=false;
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-entry').classList.add('active');
+  document.getElementById('players-grid').innerHTML='';
+  document.getElementById('chat-messages').innerHTML='';
+}
+
+// ════════════════════════════════════════════════
+//  UTIL
+// ════════════════════════════════════════════════
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Periodic state broadcast
+setInterval(() => {
+  if (currentRoom && wsReady) wsSend({ type:'PLAYER_STATE', player: getMyPlayerData() });
+}, 3000);
+
+// BOOT
+connectWS();
+</script>
+</body>
+</html>
