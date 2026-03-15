@@ -425,7 +425,8 @@ function handleServerMsg(msg) {
     case 'PLAYER_STATE':
       if (msg.player.id !== me.id) {
         const existed = !!players[msg.player.id];
-        players[msg.player.id] = { ...msg.player, speed: msg.player.speed||5 };
+        const prevSpeed = players[msg.player.id]?.speed;
+        players[msg.player.id] = { ...msg.player, speed: prevSpeed || msg.player.speed || 5 };
         if (!strokePhases[msg.player.id]) strokePhases[msg.player.id] = 0;
         if (!existed) addChatMsg({ system:true, text:`${msg.player.username} is here!` });
         renderAll();
