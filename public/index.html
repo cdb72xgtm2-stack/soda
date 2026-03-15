@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SODA SHAKE — Multiplayer Chaos</title>
+<title>fap.lol</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800;900&display=swap');
 
@@ -214,34 +214,34 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
 <!-- ENTRY SCREEN -->
 <div id="screen-entry" class="screen active">
-  <div class="logo">🥤 SODA SHAKE</div>
-  <div class="logo-sub">Multiplayer Chaos</div>
+  <div class="logo">fap.lol</div>
+  <div class="logo-sub">wip jrk-it alternative</div>
 
   <div class="entry-card">
     <!-- Connection status -->
     <div class="conn-label"><span class="conn-dot" id="conn-dot"></span><span id="conn-text">Connecting…</span></div>
 
-    <div class="section-label">Your Identity</div>
+    <div class="section-label">your identity</div>
     <input id="inp-username" class="inp" placeholder="Username…" maxlength="18">
 
     <div>
-      <div class="section-label" style="margin-bottom:8px;">Pick a flair</div>
+      <div class="section-label" style="margin-bottom:8px;">pick a flair</div>
       <div class="flair-row" id="entry-flair-row"></div>
     </div>
 
     <div class="divider"></div>
 
     <!-- Create lobby -->
-    <div class="section-label">Create lobby</div>
+    <div class="section-label">create lobby</div>
     <input id="inp-room-name" class="inp" placeholder="Room name (optional)…" maxlength="28">
     <div>
-      <div class="section-label" style="margin-bottom:6px;">Password (optional)</div>
+      <div class="section-label" style="margin-bottom:6px;">password (optional)</div>
       <div class="inp-row">
         <input id="inp-pw-create" class="inp" type="password" placeholder="Leave blank = public…" maxlength="64" autocomplete="new-password">
         <button class="pw-toggle" onclick="togglePwVis('inp-pw-create',this)" title="Show/hide">👁</button>
       </div>
       <div style="font-size:.7rem;color:var(--muted);margin-top:4px;">
-        🔒 Password is hashed client-side before sending — never sent as plaintext.
+        🔒 password is hashed client-side before sending 
       </div>
     </div>
     <button class="btn btn-primary" onclick="createLobby()">🎲 Create &amp; Join</button>
@@ -249,9 +249,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div class="divider"></div>
 
     <!-- Join lobby -->
-    <div class="section-label">Or join a lobby</div>
+    <div class="section-label">or join a lobby</div>
     <div class="lobby-list" id="lobby-list">
-      <div class="no-lobbies">No lobbies yet — create one above!</div>
+      <div class="no-lobbies">no lobbies yet... make one!</div>
     </div>
   </div>
 </div>
@@ -259,13 +259,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <!-- PASSWORD MODAL (for joining locked rooms) -->
 <div id="pw-modal">
   <div class="pw-box">
-    <h3>🔒 Password Required</h3>
-    <p>This lobby is password-protected. Enter the password to join.</p>
+    <h3>🔒 password required</h3>
+    <p>this lobby is password-protected , please enter a password -_-</p>
     <div class="inp-row">
       <input id="pw-modal-inp" class="inp" type="password" placeholder="Enter password…" maxlength="64" autocomplete="current-password">
       <button class="pw-toggle" onclick="togglePwVis('pw-modal-inp',this)" title="Show/hide">👁</button>
     </div>
-    <div class="pw-err" id="pw-err">❌ Wrong password — try again.</div>
+    <div class="pw-err" id="pw-err">wrong password u_u</div>
     <div class="pw-btns">
       <button class="btn btn-secondary" style="flex:1" onclick="closePwModal()">Cancel</button>
       <button class="btn btn-primary" style="flex:1" onclick="submitPwModal()">Join →</button>
@@ -277,26 +277,26 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <div id="screen-game" class="screen">
   <div id="game-area">
     <div class="game-header">
-      <span>🥤 SODA SHAKE</span>
-      <span class="room-tag" id="room-label">Room: —</span>
+      <span>fap.lol</span>
+      <span class="room-tag" id="room-label">room: —</span>
       <span class="room-tag" id="player-count-label">0/6</span>
       <div style="flex:1"></div>
-      <button class="btn btn-secondary btn-sm" onclick="leaveGame()">Leave</button>
+      <button class="btn btn-secondary btn-sm" onclick="leaveGame()">leave</button>
     </div>
     <div class="players-grid" id="players-grid"></div>
   </div>
 
   <div id="sidebar">
     <div class="sidebar-section">
-      <div class="sidebar-title">🏆 Leaderboard</div>
+      <div class="sidebar-title">leaderboard</div>
       <div class="lb-list" id="lb-list"></div>
     </div>
     <div class="sidebar-section">
-      <div class="sidebar-title">✨ My Flair</div>
+      <div class="sidebar-title">my flair</div>
       <div class="my-flair-row" id="sidebar-flair-row"></div>
     </div>
     <div id="chat-section">
-      <div class="sidebar-title" style="padding:11px 11px 0">💬 Chat</div>
+      <div class="sidebar-title" style="padding:11px 11px 0">chat</div>
       <div id="chat-messages"></div>
       <div class="chat-input-area">
         <div class="chat-input-row">
@@ -315,11 +315,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <div id="explosion-modal">
   <div class="modal-box">
     <div style="font-size:2.8rem">💥</div>
-    <h2>BOTTLE EXPLODED!</h2>
-    <p>Your soda bottle blew up! What do you want to do?</p>
+    <h2>busted!</h2>
+    <p>you came, what do you want to do?</p>
     <div class="modal-btns">
-      <button class="btn btn-secondary" onclick="stayInGame()">😅 Stay In</button>
-      <button class="btn btn-primary" onclick="exitGame()">👋 I'm Out</button>
+      <button class="btn btn-secondary" onclick="stayInGame()">stay in</button>
+      <button class="btn btn-primary" onclick="exitGame()">leave</button>
     </div>
   </div>
 </div>
@@ -328,13 +328,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 // ════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════
-const FLAIRS = ['🔥','💀','👑','🌊','⚡','🌈'];
+const FLAIRS = ['🍆','💦','🥛','🍑','🪢','⚣'];
 const PLAYER_COLORS = ['#ff3c6e','#00e5ff','#ffe600','#00ff9d','#ff8c00','#c77dff'];
 
 // ════════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════════
-let me = { id: crypto.randomUUID(), username:'', flair:'🔥', color: PLAYER_COLORS[Math.floor(Math.random()*6)] };
+let me = { id: crypto.randomUUID(), username:'', flair:'🍆', color: PLAYER_COLORS[Math.floor(Math.random()*6)] };
 let currentRoom = null;
 let players = {};
 let strokePhases = {};
@@ -359,15 +359,15 @@ function connectWS() {
 
   ws.onopen = () => {
     wsReady = true;
-    setConnStatus('ok', '🟢 Connected');
+    setConnStatus('ok', '🟢 connected');
   };
   ws.onclose = () => {
     wsReady = false;
-    setConnStatus('bad', '🔴 Disconnected — reload to reconnect');
+    setConnStatus('bad', '🔴 disconnected ! reload to reconnect');
     setTimeout(connectWS, 3000);
   };
   ws.onerror = () => {
-    setConnStatus('bad', '🔴 Connection error');
+    setConnStatus('bad', '🔴 connection error');
   };
   ws.onmessage = (e) => {
     let msg; try { msg = JSON.parse(e.data); } catch { return; }
